@@ -3,9 +3,9 @@
 
 
 /****************************************
- * UW User ID:  uwuserid
+ * UW User ID:  a293pate
  * Submitted for ECE 250
- * Semester of Submission:  (Winter|Spring|Fall) 20NN
+ * Semester of Submission:  Fall 2019
  *
  * By submitting this file, I affirm that
  * I am the author of all modifications to
@@ -59,82 +59,135 @@ array_state( new state[array_size] ) {
 
 template<typename T >
 DoubleHashTable<T >::~DoubleHashTable() {
-	// enter your implemetation here 
+	delete[] array;
+	delete[] array_state;
 }
 
 template<typename T >
 int DoubleHashTable<T >::size() const {
-    // enter your implemetation here 
-	return 0;
+	return count;
 }
 
 template<typename T >
 int DoubleHashTable<T >::capacity() const {
-    // enter your implemetation here 
-	return 0;
+	return array_size;
 }
-
-
 
 template<typename T >
 bool DoubleHashTable<T >::empty() const {
-    // enter your implemetation here 
-	return false;
+	if (count == 0) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 template<typename T >
 int DoubleHashTable<T >::h1( T const &obj ) const {
-	// enter your implemetation here 
+	int i = static_cast<int>(obj);
 
-	return 0;
+	i = i % array_size;
+	if (i < 0) {
+		i += array_size;
+	}
+
+	return i;
 }
 
 template<typename T >
 int DoubleHashTable<T >::h2( T const &obj ) const {
-	// enter your implemetation here 
+	int i = static_cast<int>(obj);
 
-	return 0;
+	i = i / array_size;
+
+	i = i % array_size;
+
+	if (i < 0) {
+		i += array_size;
+	}
+
+	if (i % 2 == 0) {
+		i += 1;
+	}
+
+	return i;
 }
 
 template<typename T >
 bool DoubleHashTable<T >::member( T const &obj ) const {
-	// enter your implemetation here 
+	int bin = h1(obj);
+	int jump_size = h2(obj);
+	int i = 0;
+	while (array_state[(bin + i * jump_size) % array_size] != EMPTY) { //TODO: not O(1)
+		if (array_state[(bin + i * jump_size) % array_size] == OCCUPIED &&
+			array[(bin + i * jump_size) % array_size] == obj) {
+			return true;
+		}
+		i++;
+	}
 
-	
 
 	return false;
 }
 
 template<typename T >
 T DoubleHashTable<T >::bin( int n ) const {
-    // enter your implemetation here 	      
-                    
-	return T();
+	if (array_state[n] == OCCUPIED) {
+		return array[n];
+	} else {
+		return -1;
+	}
 }
 
 template<typename T >
 void DoubleHashTable<T >::insert( T const &obj ) {
-	 // enter your implemetation here 	
-	 return ; 
+	if (count == array_size) {
+		throw overflow();
+	}
+	int bin = h1(obj);
+	int jump_size = h2(obj);
+	//std::cout << jump_size << std::endl;
+	for (int i = 0; i < array_size - 1; ++i) { //TODO: not O(1)
+		if (array_state[(bin + i * jump_size) % array_size] != OCCUPIED) {
+			array[(bin + i * jump_size) % array_size] = obj;
+			//		std::cout << (bin+i*jump_size) % array_size << std::endl;
+			count++;
+			array_state[(bin + i * jump_size) % array_size] = OCCUPIED;
+			break;
+		}
+	}
 }
 
 template<typename T >
 bool DoubleHashTable<T >::remove( T const &obj ) {
-	 // enter your implemetation here 	
+	int bin = h1(obj);
+	int jump_size = h2(obj);
+	int i = 0;
+	while (array_state[(bin + i * jump_size) % array_size] != EMPTY) { //TODO: not O(1)
+		if (array_state[(bin + i * jump_size) % array_size] == OCCUPIED &&
+			array[(bin + i * jump_size) % array_size] == obj) {
+			array_state[(bin + i * jump_size) % array_size] = DELETED;
+			count = count - 1;
+			return true;
+		}
+		i++;
+	}
 
 	return false;
 }
 
 template<typename T >
 void DoubleHashTable<T >::clear() {
-	 // enter your implemetation here 	
-	 return ; 
+	for (int i = 0; i < capacity(); ++i) {
+		remove(bin(i));
+	}
 }
 
 template<typename T >
 void DoubleHashTable<T >::print() const {
-      // enter your implemetation here 	
-	return;
+	for (int i = 0; i < capacity(); ++i) {
+		std::cout << i << " : " << bin(i) << std::endl;
+	}
 }
 
 #endif
