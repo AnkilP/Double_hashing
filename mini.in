@@ -1,0 +1,17 @@
+new: 0
+capacity 1
+size 0
+insert -2147483647
+insert!
+size 1
+remove 0 0
+member -2147483647 1
+bin 0 -2147483647
+size 1
+empty 0
+clear
+empty 1
+size 0
+capacity 1
+delete
+summary

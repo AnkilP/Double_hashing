@@ -118,7 +118,7 @@ bool DoubleHashTable<T >::member( T const &obj ) const {
 	int bin = h1(obj);
 	int jump_size = h2(obj);
 	int i = 0;
-	while (array_state[(bin + i * jump_size) % array_size] != EMPTY) { //TODO: not O(1)
+	while (array_state[(bin + i * jump_size) % array_size] != EMPTY && i < array_size) { //TODO: not O(1) and prove that the double hashing function never hits a key twice
 		if (array_state[(bin + i * jump_size) % array_size] == OCCUPIED &&
 			array[(bin + i * jump_size) % array_size] == obj) {
 			return true;
@@ -134,28 +134,28 @@ template<typename T >
 T DoubleHashTable<T >::bin( int n ) const {
 	if (array_state[n] == OCCUPIED) {
 		return array[n];
-	} else {
-		return -1;
 	}
 }
 
 template<typename T >
 void DoubleHashTable<T >::insert( T const &obj ) {
-	if (count == array_size) {
+    if (count == array_size) {
 		throw overflow();
 	}
-	int bin = h1(obj);
-	int jump_size = h2(obj);
-	//std::cout << jump_size << std::endl;
-	for (int i = 0; i < array_size - 1; ++i) { //TODO: not O(1)
-		if (array_state[(bin + i * jump_size) % array_size] != OCCUPIED) {
-			array[(bin + i * jump_size) % array_size] = obj;
-			//		std::cout << (bin+i*jump_size) % array_size << std::endl;
-			count++;
-			array_state[(bin + i * jump_size) % array_size] = OCCUPIED;
-			break;
-		}
-	}
+	else {
+        int bin = h1(obj);
+        int jump_size = h2(obj);
+        int i = 0;
+        //for (int i = 0; i < array_size - 1; ++i) { //TODO: not O(1)
+        while(array_state[(bin + i * jump_size) % array_size] == OCCUPIED){
+            i++;
+        }
+        //if (array_state[(bin + i * jump_size) % array_size] != OCCUPIED) {
+        array[(bin + i * jump_size) % array_size] = obj;
+        count++;
+        array_state[(bin + i * jump_size) % array_size] = OCCUPIED;
+        //}
+    }
 }
 
 template<typename T >
@@ -163,7 +163,7 @@ bool DoubleHashTable<T >::remove( T const &obj ) {
 	int bin = h1(obj);
 	int jump_size = h2(obj);
 	int i = 0;
-	while (array_state[(bin + i * jump_size) % array_size] != EMPTY) { //TODO: not O(1)
+	while (array_state[(bin + i * jump_size) % array_size] != EMPTY && i < array_size) { //TODO: not O(1) and prove that the double hashing function never hits a key twice
 		if (array_state[(bin + i * jump_size) % array_size] == OCCUPIED &&
 			array[(bin + i * jump_size) % array_size] == obj) {
 			array_state[(bin + i * jump_size) % array_size] = DELETED;
@@ -188,6 +188,9 @@ void DoubleHashTable<T >::print() const {
 	for (int i = 0; i < capacity(); ++i) {
 		std::cout << i << " : " << bin(i) << std::endl;
 	}
+	std::cout << "Diagnostics" << std::endl;
+    std::cout << "count: " << count << std::endl;
+    std::cout << "array_size: " << array_size << std::endl;
 }
 
 #endif
